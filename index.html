@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Professional IELTS Score Tracker - Track your progress to Band 8 with personalized study plans and analytics">
+    <title>Band8War - IELTS Score Tracker</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: float linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        #auth-section,
+        #dashboard,
+        input,
+        select,
+        button,
+        .glass-card {
+            position: relative;
+            z-index: 10;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px 0 rgba(31, 38, 135, 0.5);
+        }
+
+        .premium-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+        }
+
+        .premium-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .premium-card:hover::before {
+            opacity: 1;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% auto;
+            animation: textShine 3s linear infinite;
+        }
+
+        @keyframes textShine {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.85);
+            color: #667eea;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            border-color: white;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #667eea;
+            border-color: white;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px) scale(1.05);
+            border-bottom: 4px solid #667eea;
+            animation: tabBounce 0.5s ease;
+        }
+
+        @keyframes tabBounce {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+
+            50% {
+                transform: translateY(-5px) scale(1.08);
+            }
+
+            100% {
+                transform: translateY(-3px) scale(1.05);
+            }
+        }
+
+        .page-content {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .page-content.active {
+            display: block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(56, 239, 125, 0.5);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3941 0%, #f15e64 100%);
+            box-shadow: 0 4px 15px rgba(235, 57, 65, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(235, 57, 65, 0.5);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(245, 87, 108, 0.5);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 242, 254, 0.5);
+        }
+
+        input,
+        select {
+            transition: all 0.3s ease;
+            border: 2px solid #e5e7eb;
+            background: white;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .score-badge:hover {
+            transform: scale(1.1);
+        }
+
+        .score-high {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .score-mid {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .score-low {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .bounce {
+            animation: bounce 2s ease infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            padding: 16px !important;
+        }
+
+        table tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        table tbody tr:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .module-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .module-card:hover::before {
+            left: 100%;
+        }
+
+        .task-completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05)) !important;
+        }
+
+        .task-item {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            transform: translateX(5px);
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .icon-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .icon-circle:hover {
+            transform: rotate(360deg) scale(1.1);
+        }
+
+        .logo-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            animation: bounce 2s ease infinite;
+        }
+
+        .shine {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shine::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            bottom: -50%;
+            left: -50%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0));
+            transform: rotateZ(60deg) translate(-5em, 7.5em);
+            animation: shineEffect 3s infinite;
+        }
+
+        @keyframes shineEffect {
+            0% {
+                transform: rotateZ(60deg) translate(-5em, 7.5em);
+            }
+
+            100% {
+                transform: rotateZ(60deg) translate(25em, 7.5em);
+            }
+        }
+
+        /* ===========================
+           RESPONSIVE DESIGN
+           Mobile-First Approach
+           =========================== */
+
+        /* Mobile Devices (320px - 767px) */
+        @media (max-width: 767px) {
+            body {
+                font-size: 14px;
+            }
+
+            h1 {
+                font-size: 2.5rem !important;
+                line-height: 1.2;
+            }
+
+            h2 {
+                font-size: 1.5rem !important;
+            }
+
+            h3 {
+                font-size: 1.25rem !important;
+            }
+
+            .logo-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            /* Navigation Tabs - Stack Vertically on Mobile */
+            .nav-tabs {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .nav-tab {
+                width: 100%;
+                justify-content: center;
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+
+            .nav-tab.active {
+                transform: translateY(0) scale(1);
+                border-bottom: 3px solid #667eea;
+            }
+
+            /* Smaller padding for mobile */
+            .glass-card {
+                padding: 1rem !important;
+            }
+
+            .premium-card {
+                padding: 1.25rem !important;
+            }
+
+            /* Stats cards - Full width on mobile */
+            #stats-cards {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Adjust icon circles */
+            .icon-circle {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            /* Table adjustments */
+            table {
+                font-size: 0.85rem;
+            }
+
+            table thead th,
+            table tbody td {
+                padding: 10px !important;
+            }
+
+            /* Make table scrollable horizontally */
+            .overflow-x-auto {
+                overflow-x: scroll;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Button adjustments */
+            button {
+                font-size: 0.9rem !important;
+                padding: 10px 16px !important;
+            }
+
+            .action-btn {
+                font-size: 0.7rem;
+                padding: 4px 8px;
+            }
+
+            /* Form inputs */
+            input,
+            select {
+                font-size: 1rem !important;
+                padding: 12px !important;
+            }
+
+            /* Task items */
+            .task-item {
+                padding: 12px !important;
+            }
+
+            .task-item .font-bold {
+                font-size: 0.95rem !important;
+            }
+
+            /* Progress bar */
+            #plan-progress-bar {
+                height: 10px !important;
+            }
+
+            /* Chart adjustments */
+            canvas {
+                max-height: 250px !important;
+            }
+
+            /* Score badges */
+            .score-badge {
+                font-size: 0.75rem;
+                padding: 4px 10px;
+            }
+
+            /* User header */
+            #dashboard .glass-card:first-child {
+                text-align: center;
+            }
+
+            #dashboard .glass-card:first-child>div:first-child {
+                text-align: center;
+            }
+
+            /* Center buttons on mobile */
+            #dashboard .glass-card:first-child .flex {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            #dashboard .glass-card:first-child button {
+                width: 100%;
+            }
+        }
+
+        /* Tablet Devices (768px - 1023px) */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            h1 {
+                font-size: 3.5rem !important;
+            }
+
+            .nav-tabs {
+                justify-content: center;
+            }
+
+            .nav-tab {
+                flex: 1;
+                justify-content: center;
+                min-width: 150px;
+                font-size: 0.9rem;
+            }
+
+            /* Stats cards - 2 columns on tablet */
+            #stats-cards {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            /* Adjust spacing */
+            .glass-card {
+                padding: 1.5rem !important;
+            }
+
+            canvas {
+                max-height: 300px !important;
+            }
+        }
+
+        /* Desktop Devices (1024px+) */
+        @media (min-width: 1024px) {
+            .nav-tabs {
+                justify-content: flex-start;
+            }
+
+            /* Ensure proper grid layout */
+            .grid.lg\\:grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Very Small Devices (320px - 480px) */
+        @media (max-width: 480px) {
+
+            /* Extra small hero text */
+            h1 {
+                font-size: 2rem !important;
+            }
+
+            p.text-xl {
+                font-size: 1rem !important;
+            }
+
+            /* Compact login form */
+            #auth-section .glass-card {
+                padding: 1.5rem !important;
+            }
+
+            #auth-section svg {
+                width: 80px !important;
+                height: 80px !important;
+            }
+
+            /* Smaller navigation */
+            .nav-tab {
+                font-size: 0.85rem;
+                padding: 10px 16px;
+            }
+
+            /* Compact study plan */
+            .task-item .font-bold {
+                font-size: 0.85rem !important;
+            }
+
+            .task-item .text-sm {
+                font-size: 0.75rem !important;
+            }
+        }
+
+        /* Landscape Mobile */
+        @media (max-width: 767px) and (orientation: landscape) {
+            h1 {
+                font-size: 2rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+
+            .logo-container {
+                margin-bottom: 0.5rem !important;
+            }
+
+            #auth-section svg {
+                width: 60px !important;
+                height: 60px !important;
+                margin-bottom: 1rem !important;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+
+            .particles,
+            .nav-tabs,
+            button,
+            .action-btn {
+                display: none !important;
+            }
+
+            body {
+                background: white !important;
+            }
+
+            .glass-card {
+                background: white !important;
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+            }
+        }
+
+        /* High Resolution Displays */
+        @media (-webkit-min-device-pixel-ratio: 2),
+        (min-resolution: 192dpi) {
+            .glass-card {
+                backdrop-filter: blur(15px);
+            }
+        }
+
+        /* Touch Device Optimizations */
+        @media (hover: none) and (pointer: coarse) {
+
+            .nav-tab,
+            button,
+            .task-item {
+                min-height: 44px;
+                /* iOS touch target minimum */
+            }
+
+            .action-btn {
+                min-width: 44px;
+                min-height: 32px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="particles">
+        <div class="particle" style="width: 10px; height: 10px; left: 10%; animation-duration: 25s;"></div>
+        <div class="particle"
+            style="width: 20px; height: 20px; left: 20%; animation-duration: 30s; animation-delay: 2s;"></div>
+        <div class="particle"
+            style="width: 15px; height: 15px; left: 35%; animation-duration: 28s; animation-delay: 4s;"></div>
+        <div class="particle" style="width: 8px; height: 8px; left: 50%; animation-duration: 22s; animation-delay: 1s;">
+        </div>
+        <div class="particle"
+            style="width: 12px; height: 12px; left: 65%; animation-duration: 26s; animation-delay: 3s;"></div>
+        <div class="particle"
+            style="width: 18px; height: 18px; left: 80%; animation-duration: 24s; animation-delay: 5s;"></div>
+        <div class="particle"
+            style="width: 14px; height: 14px; left: 90%; animation-duration: 27s; animation-delay: 2s;"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-8 relative z-10">
+
+        <!-- Header -->
+        <div class="text-center mb-8 fade-in">
+            <div class="logo-container justify-center mb-4">
+                <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="45" fill="url(#logoGradient)" opacity="0.2" />
+                    <circle cx="50" cy="50" r="35" fill="url(#logoGradient)" />
+                    <path d="M 30 50 L 45 65 L 70 35" stroke="white" stroke-width="6" fill="none" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </div>
+            <h1 class="text-6xl md:text-7xl font-bold text-white mb-3 pulse"
+                style="text-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                Band8War
+            </h1>
+            <p class="text-white text-xl opacity-95 font-medium" style="text-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+                🎯 Your Journey to IELTS Excellence
+            </p>
+        </div>
+
+        <!-- Login Section -->
+        <div id="auth-section" class="max-w-md mx-auto">
+            <div class="glass-card premium-card p-10 rounded-3xl fade-in shine">
+                <div class="text-center mb-8">
+                    <svg class="w-32 h-32 mx-auto mb-6" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="bookGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <rect x="60" y="80" width="80" height="60" rx="4" fill="url(#bookGradient)" opacity="0.3" />
+                        <rect x="65" y="85" width="70" height="50" rx="3" fill="url(#bookGradient)" />
+                        <line x1="100" y1="85" x2="100" y2="135" stroke="white" stroke-width="2" opacity="0.5" />
+                        <path d="M 75 95 L 90 95" stroke="white" stroke-width="2" opacity="0.7"
+                            stroke-linecap="round" />
+                        <path d="M 75 105 L 90 105" stroke="white" stroke-width="2" opacity="0.7"
+                            stroke-linecap="round" />
+                        <path d="M 75 115 L 90 115" stroke="white" stroke-width="2" opacity="0.7"
+                            stroke-linecap="round" />
+                        <path d="M 110 95 L 125 95" stroke="white" stroke-width="2" opacity="0.7"
+                            stroke-linecap="round" />
+                        <path d="M 110 105 L 125 105" stroke="white" stroke-width="2" opacity="0.7"
+                            stroke-linecap="round" />
+                        <path d="M 110 115 L 125 115" stroke="white" stroke-width="2" opacity="0.7"
+                            stroke-linecap="round" />
+                        <polygon points="100,45 70,55 70,60 100,50 130,60 130,55" fill="#f093fb" />
+                        <rect x="98" y="50" width="4" height="20" fill="#f093fb" />
+                        <circle cx="100" cy="72" r="3" fill="#fff" />
+                    </svg>
+                    <h2 class="text-3xl font-bold gradient-text mb-2">Welcome Back!</h2>
+                    <p class="text-gray-600 text-base font-medium">Enter your name to continue your journey</p>
+                </div>
+                <input type="text" id="username" placeholder="Your Name"
+                    class="w-full p-4 rounded-xl mb-5 text-lg font-medium" onkeypress="if(event.key==='Enter') login()"
+                    autocomplete="off">
+                <button onclick="login()" class="btn-primary text-white px-6 py-4 rounded-xl w-full font-bold text-lg">
+                    🚀 Start Learning
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="hidden fade-in">
+
+            <!-- User Header -->
+            <div class="glass-card premium-card p-6 rounded-2xl mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold gradient-text flex items-center gap-2">
+                            <span>Welcome, <span id="user-display"></span>!</span>
+                            <span class="bounce">👋</span>
+                        </h2>
+                        <p class="text-gray-600 mt-2 text-base font-medium">Track your progress and achieve Band 8</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="clearAllData()"
+                            class="btn-warning text-white px-5 py-3 rounded-xl font-bold text-sm">
+                            🗑️ Clear Data
+                        </button>
+                        <button onclick="logout()" class="btn-danger text-white px-6 py-3 rounded-xl font-bold">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="glass-card premium-card p-4 rounded-2xl mb-6">
+                <div class="nav-tabs">
+                    <div class="nav-tab active" onclick="switchPage('home')">
+                        🏠 Dashboard
+                    </div>
+                    <div class="nav-tab" onclick="switchPage('progress')">
+                        📊 Progress Analytics
+                    </div>
+                    <div class="nav-tab" onclick="switchPage('study-plan')">
+                        📅 Study Plan
+                    </div>
+                    <div class="nav-tab" onclick="switchPage('ai-tips')">
+                        🤖 AI Tips
+                    </div>
+                </div>
+            </div>
+
+            <!-- HOME PAGE -->
+            <div id="page-home" class="page-content active">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6" id="stats-cards"></div>
+
+                <div class="glass-card premium-card p-7 rounded-2xl module-card">
+                    <h3 class="text-2xl font-bold gradient-text mb-5 flex items-center gap-2">
+                        ✍️ Add New Score
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <select id="module" class="p-4 rounded-xl text-lg font-semibold">
+                            <option>Listening</option>
+                            <option>Reading</option>
+                            <option>Writing</option>
+                            <option>Speaking</option>
+                        </select>
+                        <input type="number" id="score" placeholder="Band Score (0.0 - 9.0)" min="0" max="9" step="0.5"
+                            class="p-4 rounded-xl text-lg font-medium" onkeypress="if(event.key==='Enter') addScore()">
+                        <button onclick="addScore()"
+                            class="btn-success text-white px-6 py-4 rounded-xl font-bold text-lg">
+                            📊 Add Score
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROGRESS PAGE -->
+            <div id="page-progress" class="page-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-card premium-card p-7 rounded-2xl module-card">
+                        <h3 class="text-2xl font-bold gradient-text mb-5 flex items-center gap-2">
+                            📈 Your Progress Chart
+                        </h3>
+                        <canvas id="progressChart"></canvas>
+                        <div
+                            class="mt-6 p-6 bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 rounded-2xl border-2 border-purple-200">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="font-bold text-gray-700 text-lg">Overall Band Score:</span>
+                                <span id="overall-band" class="text-4xl font-black gradient-text">-</span>
+                            </div>
+                            <div class="text-sm text-gray-700 font-semibold">
+                                <span>Gap to Band 8: <strong id="gap-to-target"
+                                        class="text-purple-700 text-base">-</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card premium-card p-7 rounded-2xl module-card">
+                        <h3 class="text-2xl font-bold gradient-text mb-5 flex items-center gap-2">
+                            🏆 Score History
+                        </h3>
+                        <div class="overflow-x-auto rounded-xl max-h-[600px] overflow-y-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr>
+                                        <th class="p-4 text-left rounded-tl-xl">Module</th>
+                                        <th class="p-4 text-left">Score</th>
+                                        <th class="p-4 text-left">Date</th>
+                                        <th class="p-4 text-left rounded-tr-xl">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="score-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STUDY PLAN PAGE -->
+            <div id="page-study-plan" class="page-content">
+                <div class="glass-card premium-card p-7 rounded-2xl module-card">
+                    <div class="flex justify-between items-center mb-5">
+                        <h3 class="text-3xl font-bold gradient-text flex items-center gap-2">
+                            📅 20-Day Study Plan to Band 8
+                        </h3>
+                        <button onclick="resetPlan()"
+                            class="btn-warning text-white px-5 py-3 rounded-xl font-bold text-sm">
+                            🔄 Reset Progress
+                        </button>
+                    </div>
+
+                    <div
+                        class="mb-6 p-6 bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 rounded-2xl border-2 border-purple-200">
+                        <div class="flex justify-between text-base mb-3 font-bold">
+                            <span class="text-gray-800">Study Progress:</span>
+                            <span id="plan-progress" class="gradient-text text-lg">0/20 days</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                            <div id="plan-progress-bar"
+                                class="bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 h-4 rounded-full transition-all duration-500"
+                                style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <ul id="plan-list" class="space-y-3"></ul>
+                </div>
+            </div>
+
+            <!-- AI TIPS PAGE -->
+            <div id="page-ai-tips" class="page-content">
+                <div class="glass-card premium-card p-7 rounded-2xl module-card">
+                    <h3 class="text-3xl font-bold gradient-text mb-6 flex items-center gap-2">
+                        🤖 AI-Powered Study Tips
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div
+                            class="p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl border-l-4 border-purple-500 hover:shadow-xl transition">
+                            <div class="flex items-start gap-4">
+                                <span class="text-4xl">💡</span>
+                                <div>
+                                    <p class="text-lg font-bold text-gray-900 mb-2">Daily Listening Practice</p>
+                                    <p class="text-gray-700">Listen to English podcasts for 30 minutes daily to improve
+                                        comprehension speed and accent familiarity.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl border-l-4 border-blue-500 hover:shadow-xl transition">
+                            <div class="flex items-start gap-4">
+                                <span class="text-4xl">📖</span>
+                                <div>
+                                    <p class="text-lg font-bold text-gray-900 mb-2">Vocabulary Building</p>
+                                    <p class="text-gray-700">Learn 10 new academic words daily and create sentences to
+                                        reinforce contextual usage.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border-l-4 border-green-500 hover:shadow-xl transition">
+                            <div class="flex items-start gap-4">
+                                <span class="text-4xl">✍️</span>
+                                <div>
+                                    <p class="text-lg font-bold text-gray-900 mb-2">Writing Templates</p>
+                                    <p class="text-gray-700">Master 5 essay templates for Task 2 to ensure consistent
+                                        structure and coherence.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="p-6 bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl border-l-4 border-orange-500 hover:shadow-xl transition">
+                            <div class="flex items-start gap-4">
+                                <span class="text-4xl">🗣️</span>
+                                <div>
+                                    <p class="text-lg font-bold text-gray-900 mb-2">Speaking Fluency</p>
+                                    <p class="text-gray-700">Practice speaking for 2 minutes on random topics daily to
+                                        build confidence and reduce hesitation.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button class="btn-info text-white px-8 py-4 rounded-xl font-bold text-lg"
+                            onclick="alert('🚀 AI personalization coming soon! We\'ll analyze your score patterns and provide tailored recommendations.')">
+                            ✨ Get Personalized AI Recommendations
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const USER_KEY = 'ielts_user';
+        const SCORE_KEY = 'ielts_scores';
+        const PLAN_KEY = 'ielts_plan';
+        let currentUser = null;
+        let currentPage = 'home';
+
+        function switchPage(page) {
+            currentPage = page;
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            event.target.classList.add('active');
+
+            if (page === 'progress') {
+                setTimeout(() => updateChart(), 100);
+            }
+        }
+
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            if (!username) {
+                alert('Please enter your name');
+                return;
+            }
+            currentUser = username;
+            localStorage.setItem(USER_KEY, currentUser);
+            if (!localStorage.getItem(SCORE_KEY)) {
+                localStorage.setItem(SCORE_KEY, JSON.stringify({}));
+            }
+            if (!localStorage.getItem(PLAN_KEY)) {
+                localStorage.setItem(PLAN_KEY, JSON.stringify({}));
+            }
+            showDashboard();
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                currentUser = null;
+                localStorage.removeItem(USER_KEY);
+                document.getElementById('dashboard').classList.add('hidden');
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('username').value = '';
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ This will delete ALL your scores and progress. Are you sure?')) {
+                let allScores = JSON.parse(localStorage.getItem(SCORE_KEY));
+                let allPlans = JSON.parse(localStorage.getItem(PLAN_KEY));
+                delete allScores[currentUser];
+                delete allPlans[currentUser];
+                localStorage.setItem(SCORE_KEY, JSON.stringify(allScores));
+                localStorage.setItem(PLAN_KEY, JSON.stringify(allPlans));
+                showDashboard();
+                alert('✅ All data cleared successfully!');
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('user-display').innerText = currentUser;
+            updateStatsCards();
+            updateScoresTable();
+            generatePlan();
+            updateChart();
+            updateOverallBand();
+        }
+
+        function addScore() {
+            const module = document.getElementById('module').value;
+            const score = parseFloat(document.getElementById('score').value);
+            if (isNaN(score) || score < 0 || score > 9) {
+                alert('Please enter a valid band score between 0 and 9');
+                return;
+            }
+            let allScores = JSON.parse(localStorage.getItem(SCORE_KEY));
+            if (!allScores[currentUser]) allScores[currentUser] = [];
+            allScores[currentUser].push({
+                id: Date.now(),
+                module,
+                score,
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            });
+            localStorage.setItem(SCORE_KEY, JSON.stringify(allScores));
+            document.getElementById('score').value = '';
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Added!';
+            setTimeout(() => { btn.innerHTML = originalText; }, 1500);
+            updateStatsCards();
+            updateScoresTable();
+            updateChart();
+            updateOverallBand();
+        }
+
+        function deleteScore(scoreId) {
+            if (confirm('Are you sure you want to delete this score?')) {
+                let allScores = JSON.parse(localStorage.getItem(SCORE_KEY));
+                allScores[currentUser] = allScores[currentUser].filter(s => s.id !== scoreId);
+                localStorage.setItem(SCORE_KEY, JSON.stringify(allScores));
+                updateStatsCards();
+                updateScoresTable();
+                updateChart();
+                updateOverallBand();
+            }
+        }
+
+        function updateScoresTable() {
+            let allScores = JSON.parse(localStorage.getItem(SCORE_KEY));
+            const scores = allScores[currentUser] || [];
+            const tbody = document.getElementById('score-table');
+            if (scores.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-500 font-medium">No scores yet. Add your first score! 🚀</td></tr>';
+                return;
+            }
+            tbody.innerHTML = scores.slice().reverse().map(s => {
+                const badgeClass = s.score >= 7.5 ? 'score-high' : s.score >= 6 ? 'score-mid' : 'score-low';
+                return `
+                    <tr>
+                        <td class="p-4 font-bold text-gray-800">${s.module}</td>
+                        <td class="p-4"><span class="score-badge ${badgeClass}">${s.score}</span></td>
+                        <td class="p-4 text-gray-600 font-medium">${s.date}</td>
+                        <td class="p-4">
+                            <button onclick="deleteScore(${s.id})" class="action-btn btn-danger text-white hover:scale-110">
+                                🗑️ Delete
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateStatsCards() {
+            let allScores = JSON.parse(localStorage.getItem(SCORE_KEY));
+            const scores = allScores[currentUser] || [];
+            const modules = ['Listening', 'Reading', 'Writing', 'Speaking'];
+            const colors = {
+                'Listening': 'from-blue-400 to-blue-600',
+                'Reading': 'from-green-400 to-green-600',
+                'Writing': 'from-yellow-400 to-yellow-600',
+                'Speaking': 'from-red-400 to-red-600'
+            };
+            const icons = { 'Listening': '🎧', 'Reading': '📖', 'Writing': '✏️', 'Speaking': '🗣️' };
+            const statsHTML = modules.map(mod => {
+                const modScores = scores.filter(s => s.module === mod).map(s => s.score);
+                const latestScore = modScores.length ? modScores[modScores.length - 1] : 0;
+                const avgScore = modScores.length ? (modScores.reduce((a, b) => a + b, 0) / modScores.length).toFixed(1) : 0;
+                return `
+                    <div class="glass-card premium-card p-6 rounded-2xl module-card">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="icon-circle bg-gradient-to-br ${colors[mod]}">
+                                <span class="text-3xl">${icons[mod]}</span>
+                            </div>
+                            <span class="score-badge ${latestScore >= 7.5 ? 'score-high' : latestScore >= 6 ? 'score-mid' : 'score-low'}">
+                                ${latestScore || '-'}
+                            </span>
+                        </div>
+                        <h4 class="font-bold text-gray-900 text-xl mb-1">${mod}</h4>
+                        <p class="text-sm text-gray-600 font-semibold">Average: ${avgScore}</p>
+                        <div class="mt-4 h-3 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r ${colors[mod]} transition-all duration-500" style="width: ${(latestScore / 9) * 100}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('stats-cards').innerHTML = statsHTML;
+        }
+
+        function updateOverallBand() {
+            let allScores = JSON.parse(localStorage.getItem(SCORE_KEY));
+            const scores = allScores[currentUser] || [];
+            const modules = ['Listening', 'Reading', 'Writing', 'Speaking'];
+            const latestScores = modules.map(mod => {
+                const modScores = scores.filter(s => s.module === mod).map(s => s.score);
+                return modScores.length ? modScores[modScores.length - 1] : 0;
+            });
+            const validScores = latestScores.filter(s => s > 0);
+            if (validScores.length === 0) {
+                document.getElementById('overall-band').textContent = '-';
+                document.getElementById('gap-to-target').textContent = '-';
+                return;
+            }
+            const overall = (validScores.reduce((a, b) => a + b, 0) / validScores.length).toFixed(1);
+            const gap = Math.max(0, 8.0 - overall).toFixed(1);
+            document.getElementById('overall-band').textContent = overall;
+            document.getElementById('gap-to-target').textContent = gap > 0 ? `${gap} bands` : '🎉 Target achieved!';
+        }
+
+        function updateChart() {
+            let allScores = JSON.parse(localStorage.getItem(SCORE_KEY));
+            const scores = allScores[currentUser] || [];
+            const modules = ['Listening', 'Reading', 'Writing', 'Speaking'];
+            const data = modules.map(mod => {
+                const modScores = scores.filter(s => s.module === mod).map(s => s.score);
+                return modScores.length ? modScores[modScores.length - 1] : 0;
+            });
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            if (window.myChart) window.myChart.destroy();
+            window.myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: modules,
+                    datasets: [{
+                        label: 'Current Band Score',
+                        data: data,
+                        backgroundColor: ['rgba(99, 102, 241, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(239, 68, 68, 0.8)'],
+                        borderColor: ['rgba(99, 102, 241, 1)', 'rgba(16, 185, 129, 1)', 'rgba(245, 158, 11, 1)', 'rgba(239, 68, 68, 1)'],
+                        borderWidth: 3,
+                        borderRadius: 10
+                    }, {
+                        label: 'Target Band 8',
+                        data: [8, 8, 8, 8],
+                        type: 'line',
+                        borderColor: 'rgba(168, 85, 247, 1)',
+                        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                        borderWidth: 4,
+                        borderDash: [8, 4],
+                        pointRadius: 6,
+                        pointBackgroundColor: 'rgba(168, 85, 247, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: true, position: 'bottom', labels: { padding: 20, font: { size: 13, weight: 'bold' } } },
+                        tooltip: { backgroundColor: 'rgba(0, 0, 0, 0.9)', padding: 15, titleFont: { size: 15, weight: 'bold' }, bodyFont: { size: 14 }, cornerRadius: 10 }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 9, ticks: { stepSize: 1, font: { size: 13, weight: 'bold' } }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+                        x: { ticks: { font: { size: 13, weight: 'bold' } }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function generatePlan() {
+            const plan = [
+                { day: 1, task: '🎧 Listening - Familiarization with question types', focus: 'Section 1 & 2' },
+                { day: 2, task: '📖 Reading - Skimming & Scanning techniques', focus: 'Time management' },
+                { day: 3, task: '✏️ Writing - Task 1 overview and structure', focus: 'Graph descriptions' },
+                { day: 4, task: '🗣️ Speaking - Part 1 common topics', focus: 'Fluency practice' },
+                { day: 5, task: '🎧 Listening - Note completion practice', focus: 'Section 3 & 4' },
+                { day: 6, task: '📖 Reading - True/False/Not Given strategies', focus: 'Academic texts' },
+                { day: 7, task: '✏️ Writing - Task 2 essay planning', focus: 'Opinion essays' },
+                { day: 8, task: '🗣️ Speaking - Part 2 preparation', focus: 'Cue card practice' },
+                { day: 9, task: '🎧 Listening - Multiple choice strategies', focus: 'All sections' },
+                { day: 10, task: '📖 Reading - Matching headings practice', focus: 'Paragraph understanding' },
+                { day: 11, task: '✏️ Writing - Task 1 process & maps', focus: 'Coherence & cohesion' },
+                { day: 12, task: '🗣️ Speaking - Part 3 discussion', focus: 'Abstract topics' },
+                { day: 13, task: '🎧 Listening - Full practice test', focus: 'Time management' },
+                { day: 14, task: '📖 Reading - Full practice test', focus: 'Speed & accuracy' },
+                { day: 15, task: '✏️ Writing - Both tasks timed practice', focus: 'Time allocation' },
+                { day: 16, task: '🗣️ Speaking - Full mock interview', focus: 'All parts' },
+                { day: 17, task: '🎧 Listening - Review mistakes', focus: 'Weak areas' },
+                { day: 18, task: '📖 Reading - Review mistakes', focus: 'Vocabulary building' },
+                { day: 19, task: '✏️ Writing - Review & feedback', focus: 'Grammar & lexical resource' },
+                { day: 20, task: '🎯 Full Mock Test - All modules', focus: 'Exam simulation' }
+            ];
+            let allPlans = JSON.parse(localStorage.getItem(PLAN_KEY));
+            if (!allPlans[currentUser]) allPlans[currentUser] = [];
+            const completedDays = allPlans[currentUser];
+            const planList = document.getElementById('plan-list');
+            planList.innerHTML = plan.map(p => {
+                const isCompleted = completedDays.includes(p.day);
+                return `
+                    <li class="task-item p-5 rounded-xl hover:bg-purple-50 transition-all border-l-4 border-purple-400 ${isCompleted ? 'task-completed' : ''} bg-white shadow-md hover:shadow-xl"
+                        onclick="toggleTask(${p.day})">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="font-bold text-gray-900 text-lg">
+                                    ${isCompleted ? '✅' : '⬜'} Day ${p.day}: ${p.task}
+                                </div>
+                                <div class="text-sm text-gray-600 mt-2 font-medium">Focus: ${p.focus}</div>
+                            </div>
+                        </div>
+                    </li>
+                `;
+            }).join('');
+            updatePlanProgress(completedDays.length);
+        }
+
+        function toggleTask(day) {
+            let allPlans = JSON.parse(localStorage.getItem(PLAN_KEY));
+            if (!allPlans[currentUser]) allPlans[currentUser] = [];
+            const index = allPlans[currentUser].indexOf(day);
+            if (index > -1) {
+                allPlans[currentUser].splice(index, 1);
+            } else {
+                allPlans[currentUser].push(day);
+            }
+            localStorage.setItem(PLAN_KEY, JSON.stringify(allPlans));
+            generatePlan();
+        }
+
+        function resetPlan() {
+            if (confirm('Reset all task completions?')) {
+                let allPlans = JSON.parse(localStorage.getItem(PLAN_KEY));
+                allPlans[currentUser] = [];
+                localStorage.setItem(PLAN_KEY, JSON.stringify(allPlans));
+                generatePlan();
+            }
+        }
+
+        function updatePlanProgress(completed) {
+            const total = 20;
+            const percentage = (completed / total) * 100;
+            document.getElementById('plan-progress').textContent = `${completed}/${total} days`;
+            document.getElementById('plan-progress-bar').style.width = `${percentage}%`;
+        }
+
+        window.onload = () => {
+            const savedUser = localStorage.getItem(USER_KEY);
+            if (savedUser) {
+                currentUser = savedUser;
+                showDashboard();
+            }
+        }
+    </script>
+</body>
+
+</html>
